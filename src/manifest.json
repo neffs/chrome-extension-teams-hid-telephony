@@ -1,16 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Google Meet - Jabra Call Control support",
-  "description": "Adds Jabra call control support to Google Meet",
+  "name": "Teams HID Telephony",
+  "description": "Adds call control support to Microsoft Teams",
   "icons": {
-    "16": "icon-16.png",
-    "48": "icon-48.png",
-    "128": "icon-128.png"
+    "16": "green-16.png",
+    "48": "green-48.png",
+    "128": "green-128.png"
   },
   "content_scripts": [
     {
       "matches": [
-        "https://meet.google.com/*"
+        "https://teams.live.com/*",
+        "https://teams.microsoft.com/*",
+        "https://teams.microsoft.us/*",
+        "https://teams.microsoft.us.mcas-gov.us/*",
+        "https://teams.microsoft.com.mcas.ms/*"
       ],
       "js": [
         "contentScript.bundle.js"
@@ -24,7 +28,12 @@
     "service_worker": "background.bundle.js"
   },  
   "action": {
-    "default_title": "Connect to Jabra device"
+    "default_title": "Connect to Jabra device",
+    "default_icon": {
+      "16": "red-16.png",
+      "48": "red-48.png",
+      "128": "red-128.png"
+    }
   },
   "web_accessible_resources": [
     {
@@ -32,7 +41,13 @@
         "hid_dialog.html",
         "content.styles.css"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "https://teams.live.com/*",
+        "https://teams.microsoft.com/*",
+        "https://teams.microsoft.us/*",
+        "https://teams.microsoft.us.mcas-gov.us/*",
+        "https://teams.microsoft.com.mcas.ms/*"
+      ]    
     }
   ]
 }
