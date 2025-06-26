@@ -19,7 +19,8 @@ const state = {
     },
     endCallInterval: null,
     hangupButtonMissingCounter: 0,
-    callStartFlag: false,
+    ignoreInitialCallState: false,
+    ignoreInitialMuteState: false,
   };
 
 
@@ -106,15 +107,31 @@ const endCallButton = () => document.getElementById("hangup-button");
         var callStatus = state.deviceState.callActive;
         if (state.currentCallControl && state.currentCallControl !== device) {
             if (callStatus) {
+                // End call, but only on headset
+                state.callSubscription?.unsubscribe();
+                state.muteSubscription?.unsubscribe();
                 state.currentCallControl.endCall();
+                console.info("ending call on previous headset")
             }
         }
         chrome.runtime.sendMessage({deviceConnected: false});
 
         state.currentCallControl = device;
         if (state.currentCallControl) {
+            console.info("set up new headset")
+            if (callStatus) {
+                state.ignoreInitialMuteState=true;
+                state.ignoreInitialCallState=true;    
+            }
             await addDeviceCallControl(state.currentCallControl);
             chrome.runtime.sendMessage({deviceConnected: true});
+            if (callStatus) {
+                console.info("start call on new headset")
+                state.currentCallControl.startCall();
+                state.deviceState.callActive=true;
+                // detect hangup
+                //startMonitorCallEnd();
+            }
         }
   
         
@@ -172,12 +189,17 @@ const endCallButton = () => document.getElementById("hangup-button");
         state.callSubscription = deviceCallControl.callActive.subscribe(
             (callState) => {
                 console.info("callState: "+callState);
-                state.deviceState.callActive=callState;
-                if (!callState) {
-                    var button=endCallButton();
-                    if (button) {
-                        button?.click();
-                        console.info("clicking hangup button");
+                if (state.ignoreInitialCallState) {
+                    state.ignoreInitialCallState=false;
+                }
+                else {
+                    state.deviceState.callActive=callState;
+                    if (!callState) {
+                        var button=endCallButton();
+                        if (button) {
+                            button?.click();
+                            console.info("clicking hangup button");
+                        }
                     }
                 }
             }
@@ -187,9 +209,9 @@ const endCallButton = () => document.getElementById("hangup-button");
                 console.info("muteState: "+muteState)
                 state.deviceState.muteState=muteState;
                 var button = micToggleButton();
-                if (state.callStartFlag) {
+                if (state.ignoreInitialMuteState) {
                     // on first callback, ignore value from headset and apply teams status
-                    state.callStartFlag=false;
+                    state.ignoreInitialMuteState=false;
                     if (button?.dataset.state === "mic-off" && muteState === "unmuted") {
                         state.currentCallControl.mute();
                     }
@@ -270,14 +292,9 @@ const endCallButton = () => document.getElementById("hangup-button");
                     if (!state.deviceState.callActive) {
                         console.info("ongoing call detected, starting call");
                         // save mute status, because headset might unmute
-                        var doMute = micToggleButton()?.dataset.state === "mic-off"
                         state.currentCallControl.startCall();
-                        state.callStartFlag=true;
+                        state.ignoreInitialMuteState=true;
                         state.deviceState.callActive=true;
-                        if (doMute) {
-                            console.info("mute device, from teams status")
-                            state.currentCallControl.mute()
-                        }
                         // detect hangup
                         startMonitorCallEnd();
 
