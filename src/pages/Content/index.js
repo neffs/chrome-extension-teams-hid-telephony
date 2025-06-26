@@ -1,6 +1,6 @@
-import { init, SignalType, EasyCallControlFactory, RequestedBrowserTransport, webHidPairing, ErrorType, LogLevel }  from '@gnaudio/jabra-js'
+import { init, EasyCallControlFactory, RequestedBrowserTransport, webHidPairing, LogLevel }  from '@gnaudio/jabra-js'
 
-const JABRA_PARTNER_KEY = 'fafd-0b91d5be-f026-4198-b8b4-42685884d7ca';
+const JABRA_PARTNER_KEY = '9be8-af2ca990-a27c-4fff-8f39-408e2a7464d1';
 const JABRA_APP_ID = 'chrome-teams-hid-telephony';
 const JABRA_APP_NAME = 'Teams Chrome extension';
 
