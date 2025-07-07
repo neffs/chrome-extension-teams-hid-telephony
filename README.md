@@ -1,4 +1,4 @@
-# Microsoft Teams PWA/Browser App Jabra Call Control
+# Microsoft Teams Webapp Jabra HID Call Control
 
 ## Overview
 
@@ -15,7 +15,7 @@ Supports devices working through Jabra Link dongle or USB; controlling devices c
 
 Tested with |
 --- |
-Jabra Evolve 65 / Jabra Link 370
+Jabra Evolve 60 / Jabra Link 370
 Jabra Engage 75
 ...
 
