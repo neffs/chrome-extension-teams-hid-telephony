@@ -1,6 +1,6 @@
 {
   "name": "chrome-extension-teams-hid-telephony",
-  "version": "1.4.1",
+  "version": "1.0.0",
   "description": "Adds call control support to Microsoft Teams",
   "license": "MIT",
   "repository": {
