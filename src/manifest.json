@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Teams HID Telephony",
-  "description": "Adds call control support to Microsoft Teams",
+  "name": "Teams USB Headset HID Telephony",
+  "description": "Adds native headset call control support to Microsoft Teams, currently only for Jabra devices.",
   "icons": {
     "16": "green-16.png",
     "48": "green-48.png",
