@@ -213,9 +213,11 @@ const endCallButton = () => document.getElementById("hangup-button");
                     // on first callback, ignore value from headset and apply teams status
                     state.ignoreInitialMuteState=false;
                     if (button?.dataset.state === "mic-off" && muteState === "unmuted") {
+                        console.info("setting device mute state from teams -> mute");
                         state.currentCallControl.mute();
                     }
-                    if (button?.dataset.state === "mic" && muteState === "muted") {
+                    if (button?.dataset.state !== "mic-off" && muteState === "muted") {
+                        console.info("setting device mute state from teams -> unmute");
                         state.currentCallControl.unmute();
                     }
                 }
@@ -231,7 +233,7 @@ const endCallButton = () => document.getElementById("hangup-button");
                         
                         case "muted":
                             var button = micToggleButton();
-                            if (button?.dataset.state === "mic") {
+                            if (button?.dataset.state !== "mic-off") {
                                 console.info("muted");
                                 button?.click();
                             }
@@ -371,7 +373,8 @@ const endCallButton = () => document.getElementById("hangup-button");
     const muteObserver = new MutationObserver((changes) => {
         for (const change of changes) {
             if (change.target === micToggleButton() && change.attributeName === 'aria-label') {
-                if (change.target.dataset.state === 'mic') {
+                if (change.target.dataset.state !== 'mic-off') {
+                  console.info("microphone button switched to !=mic-off");
                     try {
                         state.currentCallControl.unmute()
                     }
@@ -380,6 +383,7 @@ const endCallButton = () => document.getElementById("hangup-button");
                     }
                 }
                 else {
+                    console.info("microphone button switched to mic-off");
                     try {
                         state.currentCallControl.mute()
                     }
