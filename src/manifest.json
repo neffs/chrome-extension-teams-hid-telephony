@@ -14,7 +14,8 @@
         "https://teams.microsoft.com/*",
         "https://teams.microsoft.us/*",
         "https://teams.microsoft.us.mcas-gov.us/*",
-        "https://teams.microsoft.com.mcas.ms/*"
+        "https://teams.microsoft.com.mcas.ms/*",
+        "https://teams.cloud.microsoft/*"
       ],
       "js": [
         "contentScript.bundle.js"
@@ -46,7 +47,8 @@
         "https://teams.microsoft.com/*",
         "https://teams.microsoft.us/*",
         "https://teams.microsoft.us.mcas-gov.us/*",
-        "https://teams.microsoft.com.mcas.ms/*"
+        "https://teams.microsoft.com.mcas.ms/*",
+        "https://teams.cloud.microsoft/*"
       ]    
     }
   ]
