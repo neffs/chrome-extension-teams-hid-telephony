@@ -13,7 +13,7 @@
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
-    "@gnaudio/jabra-js": "^4.4.1",
+    "@gnaudio/jabra-js": "^4.4.5",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
