@@ -17,6 +17,8 @@ Tested with |
 --- |
 Jabra Evolve 60 / Jabra Link 370
 Jabra Engage 75
+Jabra Evolve2 65
+Jabra Evolve 75 SE / Jabra Link 380
 ...
 
 
