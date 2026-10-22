@@ -111,6 +111,18 @@ var options = {
     }),
     new CleanWebpackPlugin({ verbose: false }),
     new webpack.ProgressPlugin(),
+    // Use the pure JS HP call-control SDK instead of HP's WebAssembly build,
+    // which cannot be instantiated in a content script under the Teams CSP.
+    new webpack.NormalModuleReplacementPlugin(
+      /call-control-sdk[\\/]call_control_sdk(\.js)?$/,
+      path.join(__dirname, 'src', 'vendor', 'hp-call-control-sdk', 'call_control_sdk.js')
+    ),
+    // Pass our Jabra app ID and partner key, softphone-vendor-headsets hardcodes its own.
+    new webpack.NormalModuleReplacementPlugin(/^@gnaudio\/jabra-js$/, (resource) => {
+      if (resource.context.includes(`${path.sep}softphone-vendor-headsets${path.sep}`)) {
+        resource.request = path.join(__dirname, 'src', 'vendor', 'jabra-js.js');
+      }
+    }),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(['NODE_ENV']),
     new CopyWebpackPlugin({

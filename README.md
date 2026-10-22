@@ -1,17 +1,19 @@
-# Microsoft Teams Webapp Jabra HID Call Control
+# Microsoft Teams Webapp Headset HID Call Control
 
 ## Overview
 
-Microsoft Teams supports call control natively in the Windows App, but not the browser based version (e.g. on Linux). This Chrome extension implements call control for Jabra headsets for the Teams Web App.
+Microsoft Teams supports call control natively in the Windows App, but not the browser based version (e.g. on Linux). This Chrome extension implements call control for headsets in the Teams Web App, using the [softphone-vendor-headsets](https://github.com/purecloudlabs/softphone-vendor-headsets) library.
 
 Features:
 - Signal incoming calls on headset, accept and reject calls via button
 - Busy light on during meetings/calls
 - Sync device mute status with Teams mute button
 
-Supports devices working through Jabra Link dongle or USB; controlling devices connected directly to Bluetooth is not supported.
+Supported vendors: Jabra, HP/Poly, EPOS/Sennheiser (requires EPOS Connect), Yealink, VBeT and CyberAcoustics. Devices are recognized by their microphone name, so Teams needs microphone access first. Devices working through a dongle or USB are supported; controlling devices connected directly to Bluetooth is not supported.
 
-**IMPORTANT NOTE**: You'll need to provide HID permissions to allow the extension to work with your Jabra device. Please click on the extension icon while being on the Teams page to connect.
+HP/Poly devices use an own JavaScript implementation of HP's call control SDK (`src/vendor/hp-call-control-sdk`) instead of the WebAssembly build shipped with the library, which cannot run in a content script.
+
+**IMPORTANT NOTE**: You'll need to provide HID permissions to allow the extension to work with your headset. Please click on the extension icon while being on the Teams page to connect.
 
 Tested with |
 --- |

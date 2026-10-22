@@ -3,3 +3,6 @@ releases
 build
 node_modules
 .vscode
+build.crx
+build.zip
+build.pem

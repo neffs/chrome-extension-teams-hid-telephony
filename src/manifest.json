@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Teams USB Headset HID Telephony",
-  "description": "Adds native headset call control support to Microsoft Teams, currently only for Jabra devices.",
+  "description": "Adds native headset call control support to Microsoft Teams for Jabra, HP/Poly, EPOS/Sennheiser, Yealink, VBeT and CyberAcoustics headsets.",
   "icons": {
     "16": "green-16.png",
     "48": "green-48.png",
@@ -29,7 +29,7 @@
     "service_worker": "background.bundle.js"
   },  
   "action": {
-    "default_title": "Connect to Jabra device",
+    "default_title": "Connect to headset",
     "default_icon": {
       "16": "red-16.png",
       "48": "red-48.png",
