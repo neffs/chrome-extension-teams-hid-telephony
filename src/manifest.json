@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Teams USB Headset HID Telephony",
-  "description": "Headset call control for Microsoft Teams: Jabra, HP/Poly, EPOS/Sennheiser, Yealink, VBeT and CyberAcoustics headsets.",
+  "description": "Use your headset buttons in the Microsoft Teams web app to answer, reject and end calls and to mute or unmute.",
   "icons": {
     "16": "green-16.png",
     "48": "green-48.png",
