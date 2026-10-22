@@ -2,26 +2,41 @@
 
 ## Overview
 
-Microsoft Teams supports call control natively in the Windows App, but not the browser based version (e.g. on Linux). This Chrome extension implements call control for headsets in the Teams Web App, using the [softphone-vendor-headsets](https://github.com/purecloudlabs/softphone-vendor-headsets) library.
+The Microsoft Teams desktop app supports the call buttons on your headset, but the browser version does not, for example on Linux or ChromeOS. This Chrome extension brings headset call control to the Teams Web App, using the [softphone-vendor-headsets](https://github.com/purecloudlabs/softphone-vendor-headsets) library.
 
 Features:
-- Signal incoming calls on headset, accept and reject calls via button
-- Busy light on during meetings/calls
-- Sync device mute status with Teams mute button
+- Incoming calls ring on your headset; answer or reject them with the headset buttons
+- Hang up from the headset
+- Busy light turns on during calls and meetings
+- Mute state stays in sync between headset and Teams, in both directions
 
-Supported vendors: Jabra, HP/Poly, EPOS/Sennheiser (requires EPOS Connect), Yealink, VBeT and CyberAcoustics. Devices are recognized by their microphone name, so Teams needs microphone access first. Devices working through a dongle or USB are supported; controlling devices connected directly to Bluetooth is not supported.
+Supported headsets:
+- Jabra
+- HP / Poly
+- EPOS / Sennheiser (requires EPOS Connect)
+- Yealink
+- VBeT
+- CyberAcoustics
 
-HP/Poly devices use an own JavaScript implementation of HP's call control SDK (`src/vendor/hp-call-control-sdk`) instead of the WebAssembly build shipped with the library, which cannot run in a content script.
-
-**IMPORTANT NOTE**: You'll need to provide HID permissions to allow the extension to work with your headset. Please click on the extension icon while being on the Teams page to connect.
+Headsets connected via USB or a USB dongle are supported. Headsets paired directly with your computer's Bluetooth are not.
 
 Tested with |
 --- |
 Jabra Evolve 60 / Jabra Link 370
-Jabra Engage 75
-Jabra Evolve2 65
 Jabra Evolve 75 SE / Jabra Link 380
-...
+Jabra Evolve2 65
+Jabra Engage 75
+Poly BT700 dongle
+
+## Usage
+
+1. Open Teams in Chrome and allow microphone access, so the extension can recognize your headset by its name.
+2. The headset connects automatically. If Chrome needs permission to access it, click the extension icon, then "Connect", and select your headset.
+3. The icon turns green when the headset is connected.
+
+## Implementation notes
+
+HP/Poly devices use an own JavaScript implementation of HP's call control SDK (`src/vendor/hp-call-control-sdk`, see `PROTOCOL.md` there) instead of the WebAssembly build shipped with the library, which cannot run in a content script. For Jabra, `src/vendor/jabra-js.js` makes the library initialize the Jabra SDK with this extension's app ID and partner key.
 
 
 ## Installing and Running
