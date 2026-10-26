@@ -21,6 +21,27 @@ const state = {
     hangupButtonMissingCounter: 0,
 };
 
+/**
+ * Settings, changed in the dialog and kept in chrome.storage.local
+ */
+const settings = {
+    // select the headset as Teams microphone and speaker on every call, not only on calls answered on the headset
+    alwaysUseHeadsetAudio: false,
+};
+chrome.storage.local.get(settings)
+    .then((stored) => Object.assign(settings, stored))
+    .catch(console.error);
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') {
+        return;
+    }
+    for (const [key, { newValue }] of Object.entries(changes)) {
+        if (key in settings) {
+            settings[key] = newValue;
+        }
+    }
+});
+
 // The library logs a lot on debug level, only pass on the rest
 const logger = {
     debug() {},
@@ -40,6 +61,21 @@ const headsetService = HeadsetService.getInstance({
 const micToggleButton = () => document.getElementById("microphone-button");
 const endCallButton = () => document.getElementById("hangup-button");
 const teamsIsMuted = () => micToggleButton()?.dataset.state === "mic-off";
+
+const audioOptionsButton = () => document.getElementById("audio-button-configure");
+
+const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+async function waitFor(find, timeoutMs) {
+    for (let waited = 0; waited < timeoutMs; waited += 100) {
+        const found = find();
+        if (found) {
+            return found;
+        }
+        await sleep(100);
+    }
+    return find();
+}
 
 function newConversationId() {
     return `teams-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -94,6 +130,54 @@ async function setBestDevice() {
         state.selectedLabel = null;
         state.pendingPermissionCallback = null;
         headsetService.activeMicChange(null);
+    }
+}
+
+/**
+ * Select the headset as Teams microphone and speaker. Teams only offers this in the
+ * audio options flyout next to the mic button, so open it, pick the devices and close it again.
+ */
+let selectingAudioDevices = false;
+async function selectHeadsetAudioDevices() {
+    if (!state.selectedLabel || selectingAudioDevices) {
+        return;
+    }
+    selectingAudioDevices = true;
+    try {
+        const devices = (await navigator.mediaDevices.enumerateDevices())
+            .filter((d) => d.deviceId !== 'default' && d.deviceId !== 'communications');
+        const headsetMic = devices.find((d) => d.kind === 'audioinput' && d.label === state.selectedLabel);
+        if (!headsetMic) {
+            return;
+        }
+        // speaker and microphone of one device share the groupId, their labels may differ
+        const headsetDevices = devices.filter((d) => d.groupId === headsetMic.groupId
+            && (d.kind === 'audioinput' || d.kind === 'audiooutput'));
+
+        // the call UI is still loading right after a call was accepted
+        if (!await waitFor(audioOptionsButton, 10000)) {
+            console.warn("audio options button not found, cannot select headset audio devices");
+            return;
+        }
+        const wasOpen = audioOptionsButton().getAttribute('aria-expanded') === 'true';
+        if (!wasOpen) {
+            audioOptionsButton().click();
+        }
+        for (const device of headsetDevices) {
+            const kind = device.kind === 'audioinput' ? 'microphone' : 'speaker';
+            const option = await waitFor(() => document.getElementById(`${kind}:${device.deviceId}`), 3000);
+            if (!option) {
+                console.warn(`Teams ${kind} option for ${device.label} not found`);
+            } else if (option.getAttribute('aria-selected') !== 'true') {
+                console.info(`selecting ${device.label} as Teams ${kind}`);
+                option.click();
+            }
+        }
+        if (!wasOpen && audioOptionsButton()?.getAttribute('aria-expanded') === 'true') {
+            audioOptionsButton().click();
+        }
+    } finally {
+        selectingAudioDevices = false;
     }
 }
 
@@ -254,6 +338,16 @@ async function showDialog() {
         }
     };
 
+    const alwaysUseHeadsetAudio = document.getElementById('chkTeamsTelephonyAlwaysUseHeadsetAudio');
+    alwaysUseHeadsetAudio.checked = settings.alwaysUseHeadsetAudio;
+    alwaysUseHeadsetAudio.onchange = () => {
+        settings.alwaysUseHeadsetAudio = alwaysUseHeadsetAudio.checked;
+        chrome.storage.local.set({ alwaysUseHeadsetAudio: settings.alwaysUseHeadsetAudio }).catch(console.error);
+        if (settings.alwaysUseHeadsetAudio && state.callActive) {
+            selectHeadsetAudioDevices().catch(console.error);
+        }
+    };
+
     document.getElementById('btnTeamsTelephonyDialogClose').onclick = () => closeDialog(dialog);
 }
 
@@ -275,6 +369,9 @@ function callAccepted(conversationId) {
     headsetService.answerCall(conversationId)
         .then(() => headsetService.setMute(teamsIsMuted()))
         .catch(console.error);
+    if (settings.alwaysUseHeadsetAudio) {
+        selectHeadsetAudioDevices().catch(console.error);
+    }
 }
 
 function finishIncomingCall(incoming) {
@@ -384,6 +481,9 @@ function detectOngoingCall() {
         startCallOnHeadset().catch(console.error);
         // detect hangup
         startMonitorCallEnd();
+        if (settings.alwaysUseHeadsetAudio) {
+            selectHeadsetAudioDevices().catch(console.error);
+        }
     }
 }
 

@@ -25,6 +25,9 @@
       ]
     }
   ],
+  "permissions": [
+    "storage"
+  ],
   "background": {
     "service_worker": "background.bundle.js"
   },  
