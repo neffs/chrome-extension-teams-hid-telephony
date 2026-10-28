@@ -58,11 +58,27 @@ const headsetService = HeadsetService.getInstance({
     useNewPolyImplementation: true,
 });
 
-const micToggleButton = () => document.getElementById("microphone-button");
-const endCallButton = () => document.getElementById("hangup-button");
+/**
+ * Enterprise Teams can move the call controls into a Document Picture-in-Picture window.
+ * Content scripts are not injected there, but the window is same-origin and reachable from here.
+ */
+function pipDocument() {
+    try {
+        return window.documentPictureInPicture?.window?.document ?? null;
+    } catch (err) {
+        return null;
+    }
+}
+
+function findById(id) {
+    return document.getElementById(id) ?? pipDocument()?.getElementById(id) ?? null;
+}
+
+const micToggleButton = () => findById("microphone-button");
+const endCallButton = () => findById("hangup-button");
 const teamsIsMuted = () => micToggleButton()?.dataset.state === "mic-off";
 
-const audioOptionsButton = () => document.getElementById("audio-button-configure");
+const audioOptionsButton = () => findById("audio-button-configure");
 
 const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
@@ -165,7 +181,7 @@ async function selectHeadsetAudioDevices() {
         }
         for (const device of headsetDevices) {
             const kind = device.kind === 'audioinput' ? 'microphone' : 'speaker';
-            const option = await waitFor(() => document.getElementById(`${kind}:${device.deviceId}`), 3000);
+            const option = await waitFor(() => findById(`${kind}:${device.deviceId}`), 3000);
             if (!option) {
                 console.warn(`Teams ${kind} option for ${device.label} not found`);
             } else if (option.getAttribute('aria-selected') !== 'true') {
@@ -467,7 +483,7 @@ function endCallIfHangupButtonMissing() {
  * the call UI may be inserted as a whole or already exist when this script loads.
  */
 function detectOngoingCall() {
-    const callUiPresent = !!(document.getElementById('call-duration-custom') || endCallButton());
+    const callUiPresent = !!(findById('call-duration-custom') || endCallButton());
     if (!callUiPresent) {
         state.callUiMustDisappear = false;
     }
@@ -519,11 +535,6 @@ const callStartObserver = new MutationObserver((changes) => {
         }, 200);
     }
 });
-callStartObserver.observe(document.body, {
-    subtree: true,
-    childList: true,
-});
-detectOngoingCall();
 
 const muteObserver = new MutationObserver((changes) => {
     for (const change of changes) {
@@ -536,10 +547,34 @@ const muteObserver = new MutationObserver((changes) => {
         }
     }
 });
-muteObserver.observe(document.body, {
-    attributes: true,
-    subtree: true,
-});
+function observeDocument(root) {
+    callStartObserver.observe(root, {
+        subtree: true,
+        childList: true,
+    });
+    muteObserver.observe(root, {
+        attributes: true,
+        subtree: true,
+    });
+}
+observeDocument(document.body);
+detectOngoingCall();
+
+function observePictureInPicture(pipWindow) {
+    console.info("Teams opened a picture-in-picture window, watching it for call controls");
+    // Teams fills the window after opening it, so watch the whole document
+    observeDocument(pipWindow.document.documentElement);
+    detectIncomingCalls(pipWindow.document.documentElement);
+    detectOngoingCall();
+}
+try {
+    window.documentPictureInPicture?.addEventListener('enter', (event) => observePictureInPicture(event.window));
+    if (window.documentPictureInPicture?.window) {
+        observePictureInPicture(window.documentPictureInPicture.window);
+    }
+} catch (err) {
+    console.error("unable to watch picture-in-picture window", err);
+}
 
 window.addEventListener('beforeunload', function () {
     if (state.callActive) {
