@@ -17,6 +17,7 @@ Supported headsets:
 - Yealink
 - VBeT
 - CyberAcoustics
+- Anker PowerConf S330
 
 Headsets connected via USB or a USB dongle are supported. Headsets paired directly with your computer's Bluetooth are not.
 
@@ -27,6 +28,7 @@ Jabra Evolve 75 SE / Jabra Link 380
 Jabra Evolve2 65
 Jabra Engage 75
 Poly BT700 dongle
+Anker PowerConf S330 (Microsoft Edge on Windows)
 
 ## Usage
 
@@ -35,6 +37,8 @@ Poly BT700 dongle
 3. The icon turns green when the headset is connected.
 
 ## Implementation notes
+
+Anker PowerConf S330 uses a local WebHID adapter through the existing headset service. It supports answering incoming calls, ending calls, and two-way mute synchronization for USB device 291a:3308. The adapter sets off-hook when a call starts and clears the call and mute indicators when it ends.
 
 HP/Poly devices use an own JavaScript implementation of HP's call control SDK (`src/vendor/hp-call-control-sdk`, see `PROTOCOL.md` there) instead of the WebAssembly build shipped with the library, which cannot run in a content script. For Jabra, `src/vendor/jabra-js.js` makes the library initialize the Jabra SDK with this extension's app ID and partner key.
 
