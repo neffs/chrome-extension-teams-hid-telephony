@@ -34,6 +34,25 @@ Poly BT700 dongle
 2. The headset connects automatically. If Chrome needs permission to access it, click the extension icon, then "Connect", and select your headset.
 3. The icon turns green when the headset is connected.
 
+### Using another Teams hostname
+
+If the extension does not activate on your organization's Teams site, check the site's hostname against the URL patterns in `src/manifest.json`. An exact hostname pattern does not include its subdomains.
+
+1. Add a URL pattern for your Teams hostname to both `content_scripts[0].matches` and `web_accessible_resources[0].matches`. Preserve the existing entries. For example, these additional hostnames have been tested with Microsoft Edge on Windows, including Teams installed as an Edge app.
+
+   ```json
+   [
+     "https://gov.teams.microsoft.us/*",
+     "https://dod.teams.microsoft.us.mcas-gov.us/*"
+   ]
+   ```
+
+2. Run `npm run build` from the repository directory after installing dependencies.
+3. Open `edge://extensions` or `chrome://extensions` and reload the unpacked extension.
+4. Refresh Teams, or close and reopen the installed Teams web app. In an installed Edge app, use the title-bar **Settings and more (...) > Extensions** menu to open the headset connection dialog if needed.
+
+Use the exact hostname shown by your Teams site and include `/*` to match its paths. The site must serve a compatible Teams web interface for call control to work.
+
 ## Implementation notes
 
 HP/Poly devices use an own JavaScript implementation of HP's call control SDK (`src/vendor/hp-call-control-sdk`, see `PROTOCOL.md` there) instead of the WebAssembly build shipped with the library, which cannot run in a content script. For Jabra, `src/vendor/jabra-js.js` makes the library initialize the Jabra SDK with this extension's app ID and partner key.
