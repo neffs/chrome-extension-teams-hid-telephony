@@ -1,4 +1,4 @@
-import HeadsetService from 'softphone-vendor-headsets';
+import HeadsetService from '../../vendor/headset-service';
 
 const APP_NAME = 'Teams Chrome extension';
 
